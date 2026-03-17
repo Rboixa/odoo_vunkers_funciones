@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Acción URL para abrir el dashboard -->
+    <record id="action_dashboard_bi" model="ir.actions.act_url">
+        <field name="name">Dashboard BI</field>
+        <field name="url">/vunkers/dashboard</field>
+        <field name="target">self</field>
+    </record>
+
+    <!-- ─── Menú principal ─── -->
+    <menuitem id="menu_vunkers_bi_root"
+              name="Vunkers BI"
+              sequence="5"
+              web_icon="vunkers_dashboard_bi,static/description/icon.png"/>
+
+    <menuitem id="menu_vunkers_dashboard"
+              name="Dashboard"
+              parent="menu_vunkers_bi_root"
+              action="action_dashboard_bi"
+              sequence="1"/>
+
+    <!-- ─── Configuración ─── -->
+    <menuitem id="menu_vunkers_bi_config"
+              name="Configuración"
+              parent="menu_vunkers_bi_root"
+              sequence="90"/>
+
+    <menuitem id="menu_vunkers_business_unit"
+              name="Business Units"
+              parent="menu_vunkers_bi_config"
+              action="action_vunkers_business_unit"
+              sequence="1"/>
+
+    <menuitem id="menu_vunkers_business_area"
+              name="Áreas de Negocio"
+              parent="menu_vunkers_bi_config"
+              action="action_vunkers_business_area"
+              sequence="2"/>
+
+    <menuitem id="menu_vunkers_service_type"
+              name="Tipos de Servicio"
+              parent="menu_vunkers_bi_config"
+              action="action_vunkers_service_type"
+              sequence="3"/>
+
+</odoo>

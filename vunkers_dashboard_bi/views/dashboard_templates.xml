@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="dashboard_page" name="Vunkers BI Dashboard">
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vunkers BI - Dashboard Inteligente</title>
+<script type="text/javascript" src="/vunkers_dashboard_bi/static/lib/chart.umd.min.js"/>
+<script type="text/javascript" src="/vunkers_dashboard_bi/static/lib/chartjs-plugin-datalabels.min.js"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/vunkers_dashboard_bi/static/src/css/dashboard.css"/>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Vunkers BI</h1>
+    <div class="subtitle">Análisis Inteligente de Negocio — Apuntes Analíticos Odoo</div>
+  </div>
+  <div class="header-right">
+    <a href="/odoo" class="header-badge" style="text-decoration:none;cursor:pointer">← Volver a Odoo</a>
+    <span class="header-badge"><t t-esc="date_range"/></span>
+    <span class="header-badge source-badge"><t t-esc="source_label"/></span>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" data-tab="resumen">Resumen Suscripciones</div>
+  <div class="nav-tab" data-tab="evolucion">Evolución Ventas</div>
+  <div class="nav-tab" data-tab="explorador">Explorador Clientes</div>
+  <div class="nav-tab" data-tab="directorio">Directorio Clientes</div>
+  <div class="nav-tab" data-tab="ranking">Ranking Facturación</div>
+  <div class="nav-tab" data-tab="analisis">Análisis Suscripciones</div>
+</div>
+
+<div class="global-filters">
+  <div class="gf-group"><label>Zoom</label><select id="gf-month-from"/></div>
+  <div class="gf-group"><label>a</label><select id="gf-month-to"/></div>
+  <div class="gf-group"><label>BU</label><select id="gf-cat" onchange="onCatChange()"><option value="">Todas</option></select></div>
+  <div class="gf-group"><label>Clase de Productos</label><select id="gf-subcat1" onchange="onSubcat1Change()"><option value="">Todas</option></select></div>
+  <div class="gf-group"><label>Familia de Productos</label><select id="gf-subcat2" onchange="onSubcat2Change()"><option value="">Todos</option></select></div>
+  <div class="gf-group"><label>Producto</label><select id="gf-product"><option value="">Todos</option></select></div>
+  <select id="gf-acct" style="display:none"><option value="">Todas</option></select>
+  <div id="mode-monthly" style="display:none"/>
+  <div id="mode-ytd" style="display:none"/>
+  <button class="gf-reset" onclick="resetAllFilters()">Reset</button>
+  <div class="gf-info"><strong id="gf-count">-</strong></div>
+</div>
+
+<!-- Tab 1: Resumen Suscripciones -->
+<div class="tab-content active" id="tab-resumen"><div class="container">
+  <div id="bu-cards-grid" class="bu-cards-grid"/>
+</div></div>
+
+<!-- Tab 2: Evolución Ventas -->
+<div class="tab-content" id="tab-evolucion"><div class="container">
+  <div id="tipo-kpis-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px"/>
+  <div class="charts-grid full"><div class="chart-card"><h3>Evolución Histórica de Facturación</h3><div style="height:350px"><canvas id="chart-evo-hist"/></div></div></div>
+  <div class="charts-grid full">
+    <div class="chart-card"><h3>Facturación por Tipo (Producto/Servicios/Software)</h3><div style="height:300px"><canvas id="chart-tipo-evo"/></div></div>
+  </div>
+</div></div>
+
+<!-- Tab 3: Explorador Clientes -->
+<div class="tab-content" id="tab-explorador"><div class="container">
+  <div class="filters"><div class="filter-group" style="flex:2"><label>Buscar Cliente</label><input type="text" class="search-box" id="client-search" placeholder="Escribe para buscar..." oninput="filterClients()"/></div></div>
+  <div id="client-list"/>
+</div></div>
+
+<!-- Tab 4: Directorio Clientes -->
+<div class="tab-content" id="tab-directorio"><div class="container">
+  <div class="chart-card"><h3>Listado de Clientes y Facturación</h3><div class="table-scroll"><table class="data-table"><thead><tr><th>#</th><th>Cliente</th><th>Business</th><th class="right">Total</th><th class="right">Últ. Mes</th><th class="right">Var %</th></tr></thead><tbody id="client-table-body"/></table></div></div>
+</div></div>
+
+<!-- Tab 5: Ranking Facturación -->
+<div class="tab-content" id="tab-ranking"><div class="container">
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Top 15 Clientes por Facturación</h3><div style="height:500px"><canvas id="chart-top-clients"/></div></div>
+    <div class="chart-card"><h3>Top 15 Categorías por Facturación</h3><div style="height:500px"><canvas id="chart-top-cats"/></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Productos que Más Suben</h3><div class="table-scroll" style="max-height:350px"><table class="data-table" id="prods-up-table"><thead><tr><th>Producto</th><th class="right">Anterior</th><th class="right">Actual</th><th class="right">Var</th></tr></thead><tbody/></table></div></div>
+    <div class="chart-card"><h3>Productos que Más Bajan</h3><div class="table-scroll" style="max-height:350px"><table class="data-table" id="prods-down-table"><thead><tr><th>Producto</th><th class="right">Anterior</th><th class="right">Actual</th><th class="right">Var</th></tr></thead><tbody/></table></div></div>
+  </div>
+</div></div>
+
+<!-- Tab 6: Análisis Suscripciones -->
+<div class="tab-content" id="tab-analisis"><div class="container">
+  <div class="kpi-grid" id="kpi-subs"/>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Facturación Recurrente por Business Unit</h3><div style="height:350px"><canvas id="chart-mrr-bu"/></div></div>
+    <div class="chart-card"><h3>Distribución por Tipo (Analítica)</h3><div style="height:350px"><canvas id="chart-tipo-dist"/></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Facturación por Cuenta Contable</h3><div style="height:350px"><canvas id="chart-acct-dist"/></div></div>
+    <div class="chart-card"><h3>Clientes Activos por Mes</h3><div style="height:350px"><canvas id="chart-active-clients"/></div></div>
+  </div>
+</div></div>
+
+<!-- Data + Dashboard JS -->
+<script type="text/javascript">
+const DATA = <t t-raw="data_json"/>;
+</script>
+<script type="text/javascript" src="/vunkers_dashboard_bi/static/src/js/dashboard.js"/>
+
+</body>
+</html>
+</template>
+</odoo>

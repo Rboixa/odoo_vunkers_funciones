@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vunkers_service_type_user,vunkers.service.type.user,model_vunkers_service_type,base.group_user,1,0,0,0
+access_vunkers_service_type_admin,vunkers.service.type.admin,model_vunkers_service_type,base.group_system,1,1,1,1
+access_vunkers_business_area_user,vunkers.business.area.user,model_vunkers_business_area,base.group_user,1,0,0,0
+access_vunkers_business_area_admin,vunkers.business.area.admin,model_vunkers_business_area,base.group_system,1,1,1,1
+access_vunkers_business_unit_user,vunkers.business.unit.user,model_vunkers_business_unit,base.group_user,1,0,0,0
+access_vunkers_business_unit_admin,vunkers.business.unit.admin,model_vunkers_business_unit,base.group_system,1,1,1,1
