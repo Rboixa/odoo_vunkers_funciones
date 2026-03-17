@@ -1,18 +1,109 @@
+import base64
 import json
 import logging
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, models
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
+CACHE_ATTACHMENT_NAME = 'vunkers_dashboard_bi.cache_data'
 
-class VunkersDashboardData(models.AbstractModel):
+
+class VunkersDashboardData(models.TransientModel):
     _name = 'vunkers.dashboard.data'
     _description = 'Generador de datos para Dashboard BI'
+
+    # ── cache en ir.attachment ────────────────────────────────────────────
+
+    @api.model
+    def _get_cache_attachment(self):
+        """Busca el attachment que contiene los datos cacheados."""
+        return self.env['ir.attachment'].sudo().search([
+            ('name', '=', CACHE_ATTACHMENT_NAME),
+            ('res_model', '=', self._name),
+        ], limit=1)
+
+    @api.model
+    def get_cached_data(self):
+        """
+        Devuelve los datos del dashboard desde la cache.
+        Si no hay cache, genera los datos al vuelo y los guarda.
+        Retorna: (data_dict, metadata_dict)
+        """
+        att = self._get_cache_attachment()
+        if att:
+            try:
+                raw = base64.b64decode(att.datas).decode('utf-8')
+                payload = json.loads(raw)
+                data = payload.get('data', {})
+                meta = {
+                    'generated_at': payload.get('generated_at', ''),
+                    'record_count': payload.get('record_count', 0),
+                    'generation_time_s': payload.get('generation_time_s', 0),
+                }
+                return data, meta
+            except (json.JSONDecodeError, UnicodeDecodeError, TypeError):
+                _logger.warning('Dashboard BI: cache corrupta, regenerando...')
+
+        # No hay cache o está corrupta → generar al vuelo
+        data, meta = self.refresh_cache()
+        return data, meta
+
+    @api.model
+    def refresh_cache(self):
+        """
+        Regenera los datos del dashboard y los guarda en ir.attachment.
+        Retorna: (data_dict, metadata_dict)
+        """
+        start = datetime.now()
+        data = self.generate_dashboard_data()
+        elapsed = (datetime.now() - start).total_seconds()
+
+        record_count = len(data.get('_rc', []))
+        generated_at = fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        payload = {
+            'data': data,
+            'generated_at': generated_at,
+            'record_count': record_count,
+            'generation_time_s': round(elapsed, 2),
+        }
+        raw_json = json.dumps(payload, ensure_ascii=False)
+        datas = base64.b64encode(raw_json.encode('utf-8'))
+
+        att = self._get_cache_attachment()
+        vals = {
+            'name': CACHE_ATTACHMENT_NAME,
+            'datas': datas,
+            'res_model': self._name,
+            'res_id': 0,
+            'type': 'binary',
+            'mimetype': 'application/json',
+        }
+        if att:
+            att.sudo().write(vals)
+        else:
+            self.env['ir.attachment'].sudo().create(vals)
+
+        meta = {
+            'generated_at': generated_at,
+            'record_count': record_count,
+            'generation_time_s': round(elapsed, 2),
+        }
+        _logger.info(
+            'Dashboard BI: cache regenerada — %d registros en %.1fs',
+            record_count, elapsed,
+        )
+        return data, meta
+
+    @api.model
+    def cron_refresh_cache(self):
+        """Método llamado por el cron para regenerar la cache."""
+        self.refresh_cache()
 
     # ── helpers ──────────────────────────────────────────────────────────
 

@@ -6,8 +6,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Vunkers BI - Dashboard Inteligente</title>
-<script type="text/javascript" src="/vunkers_dashboard_bi/static/lib/chart.umd.min.js"/>
-<script type="text/javascript" src="/vunkers_dashboard_bi/static/lib/chartjs-plugin-datalabels.min.js"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/vunkers_dashboard_bi/static/src/css/dashboard.css"/>
 </head>
@@ -19,9 +19,21 @@
     <div class="subtitle">Análisis Inteligente de Negocio — Apuntes Analíticos Odoo</div>
   </div>
   <div class="header-right">
-    <a href="/odoo" class="header-badge" style="text-decoration:none;cursor:pointer">← Volver a Odoo</a>
+    <a href="/odoo" class="header-badge" style="text-decoration:none;cursor:pointer">&#x2190; Volver a Odoo</a>
     <span class="header-badge"><t t-esc="date_range"/></span>
     <span class="header-badge source-badge"><t t-esc="source_label"/></span>
+    <span class="header-badge" style="font-size:9px;opacity:0.8" title="Última actualización de datos">
+      <t t-if="cache_generated_at">
+        &#x1F4C5; <t t-esc="cache_generated_at"/> · <t t-esc="cache_record_count"/> registros · <t t-esc="cache_generation_time"/>s
+      </t>
+    </span>
+    <a href="/vunkers/dashboard/refresh-redirect"
+       class="header-badge"
+       style="text-decoration:none;cursor:pointer;background:rgba(5,150,105,0.3);border-color:rgba(5,150,105,0.5)"
+       title="Regenerar datos del dashboard desde Odoo"
+       onclick="this.textContent='Regenerando...';this.style.opacity='0.6'">
+      &#x1F504; Actualizar datos
+    </a>
   </div>
 </div>
 

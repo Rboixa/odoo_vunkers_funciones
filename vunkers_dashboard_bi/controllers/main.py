@@ -11,8 +11,9 @@ class VunkersDashboardController(http.Controller):
 
     @http.route('/vunkers/dashboard', type='http', auth='user', website=False)
     def dashboard_page(self, **kwargs):
-        """Sirve la página completa del dashboard BI."""
-        data = request.env['vunkers.dashboard.data'].generate_dashboard_data()
+        """Sirve la página del dashboard BI desde la cache."""
+        DashData = request.env['vunkers.dashboard.data']
+        data, meta = DashData.get_cached_data()
         data_json = json.dumps(data, ensure_ascii=False)
 
         # Información de cabecera
@@ -29,13 +30,37 @@ class VunkersDashboardController(http.Controller):
                 'data_json': data_json,
                 'date_range': date_range,
                 'source_label': data.get('source', ''),
+                'cache_generated_at': meta.get('generated_at', ''),
+                'cache_record_count': meta.get('record_count', 0),
+                'cache_generation_time': meta.get('generation_time_s', 0),
             },
         )
 
     @http.route('/vunkers/dashboard/data', type='json', auth='user')
     def dashboard_data(self, **kwargs):
-        """Endpoint JSON para refrescar datos sin recargar la página."""
-        return request.env['vunkers.dashboard.data'].generate_dashboard_data()
+        """Endpoint JSON-RPC: devuelve los datos cacheados."""
+        DashData = request.env['vunkers.dashboard.data']
+        data, meta = DashData.get_cached_data()
+        return {'data': data, 'meta': meta}
+
+    @http.route('/vunkers/dashboard/refresh', type='json', auth='user')
+    def dashboard_refresh(self, **kwargs):
+        """Endpoint JSON-RPC: regenera la cache y devuelve los datos nuevos."""
+        DashData = request.env['vunkers.dashboard.data']
+        data, meta = DashData.refresh_cache()
+        return {'data': data, 'meta': meta}
+
+    @http.route(
+        '/vunkers/dashboard/refresh-redirect',
+        type='http', auth='user', website=False,
+    )
+    def dashboard_refresh_redirect(self, **kwargs):
+        """
+        Regenera la cache y redirige al dashboard.
+        Útil como enlace directo (botón HTML).
+        """
+        request.env['vunkers.dashboard.data'].refresh_cache()
+        return request.redirect('/vunkers/dashboard')
 
     @staticmethod
     def _format_month_label(month_str):

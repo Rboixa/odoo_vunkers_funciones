@@ -5,3 +5,4 @@ access_vunkers_business_area_user,vunkers.business.area.user,model_vunkers_busin
 access_vunkers_business_area_admin,vunkers.business.area.admin,model_vunkers_business_area,base.group_system,1,1,1,1
 access_vunkers_business_unit_user,vunkers.business.unit.user,model_vunkers_business_unit,base.group_user,1,0,0,0
 access_vunkers_business_unit_admin,vunkers.business.unit.admin,model_vunkers_business_unit,base.group_system,1,1,1,1
+access_vunkers_dashboard_data_user,vunkers.dashboard.data.user,model_vunkers_dashboard_data,base.group_user,1,1,1,1

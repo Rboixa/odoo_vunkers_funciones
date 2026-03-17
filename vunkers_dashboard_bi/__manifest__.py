@@ -25,6 +25,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/service_type_data.xml',
+        'data/cron_data.xml',
         'views/dashboard_templates.xml',
         'views/business_unit_views.xml',
         'views/menu.xml',
